@@ -1,0 +1,20 @@
+Vagrant.configure("2") do |config|
+    config.vm.provider :virtualbox do |v|
+        v.customize ['storagectl', :id, '--name',  'SATA Controller', '--add', 'sata',  '--controller', 'IntelAhci', '--portcount', 4]
+
+        unless File.exist?(".data-disk.vdi")
+          v.customize ['createhd', '--filename', ".data-disk.vdi", '--size', 5 * 1024]
+        end
+        unless File.exist?(".journal-disk.vdi")
+          v.customize ['createhd', '--filename', ".journal-disk.vdi", '--size', 5 * 1024]
+        end
+
+        v.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 0, '--device', 0, '--type', 'hdd', '--medium', ".data-disk.vdi"]
+        v.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', ".journal-disk.vdi"]
+        v.memory = 1024
+        #v.disk :disk, name: "disk1", size: "2GB"
+        #v.disk :disk, name: "disk2", size: "2GB"
+    end
+
+    config.vm.box = "centos/7"
+  end
